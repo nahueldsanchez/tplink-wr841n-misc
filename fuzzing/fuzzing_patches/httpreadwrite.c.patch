@@ -1,0 +1,76 @@
++++ tplink-wr841/gpl_code/TL-WR841NV14/apps/public/upnp_libs/src/httpreadwrite.c
+@@ -281,12 +281,22 @@
+  * 	 UPNP_E_SUCCESS
+  *	 UPNP_E_BAD_HTTPMSG
+  */
++#ifdef AFL_FUZZING
++int http_RecvMessage(
++	IN char raw_buffer[],
++	IN int raw_buffer_size,
++	OUT http_parser_t *parser,
++	IN http_method_t request_method,
++	IN OUT int *timeout_secs,
++	OUT int *http_error_code)
++#else
+ int http_RecvMessage(
+ 	IN SOCKINFO *info,
+ 	OUT http_parser_t *parser,
+ 	IN http_method_t request_method,
+ 	IN OUT int *timeout_secs,
+ 	OUT int *http_error_code)
++#endif
+ {
+ 	int ret = UPNP_E_SUCCESS;
+ 	int line = 0;
+@@ -301,8 +311,13 @@
+ 		parser_response_init(parser, request_method);
+ 	}
+ 
++		#ifdef AFL_FUZZING
++		num_read = raw_buffer_size;
++		memcpy(buf, raw_buffer, raw_buffer_size);
+ 	while (TRUE) {
++		#else
+ 		num_read = sock_read(info, buf, sizeof buf, timeout_secs);
++		#endif
+ 		if (num_read > 0) {
+ 			/* got data */
+ 			status = parser_append(parser, buf, (size_t)num_read);
+@@ -360,6 +375,10 @@
+ 			ret = num_read;
+ 			goto ExitFunction;
+ 		}
++		#ifdef AFL_FUZZING
++		// Adding this to avoid an infinite loop
++		num_read = 0;
++		#endif
+ 	}
+ 
+ ExitFunction:
+@@ -619,8 +638,12 @@
+ 		goto end_function;
+ 	}
+ 	/* recv response */
++	#ifdef AFL_FUZZING
++	ret_code = 0;
++	#else
+ 	ret_code = http_RecvMessage(&info, response, req_method,
+ 		&timeout_secs, &http_error_code);
++	#endif
+ 
+ end_function:
+ 	/* should shutdown completely */
+@@ -960,8 +983,12 @@
+ 		retc = sock_write(&handle->sock_info, zcrlf, strlen(zcrlf), &timeout);
+ 	/*read response */
+ 	parser_response_init(&response, HTTPMETHOD_POST);
++	#ifdef AFL_FUZZING
++	retc = 0;
++	#else
+ 	retc = http_RecvMessage(&handle->sock_info, &response,
+ 		HTTPMETHOD_POST, &timeout, &http_error_code);
++	#endif
+ 	*httpStatus = http_error_code;
+ 	/*should shutdown completely */
+ 	sock_destroy(&handle->sock_info, SD_BOTH);
+

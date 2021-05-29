@@ -1,0 +1,26 @@
+
++++ tplink-wr841/gpl_code/TL-WR841NV14/apps/public/upnp_libs/inc/httpreadwrite.h
+@@ -120,12 +120,20 @@
+  *	 UPNP_E_BAD_HTTPMSG
+  * 	 UPNP_E_SUCCESS
+  ************************************************************************/
++#ifdef AFL_FUZZING
++int http_RecvMessage(
++	IN char raw_buffer[],
++	IN int raw_buffer_size,
++	OUT http_parser_t *parser,
++	IN http_method_t request_method,
++	IN OUT int *timeout_secs,
++	OUT int *http_error_code);
++#else
+ int http_RecvMessage( IN SOCKINFO *info, OUT http_parser_t* parser,
+ 		IN http_method_t request_method, 
+ 		IN OUT int* timeout_secs,
+ 		OUT int* http_error_code );
+-
+-
++#endif
+ /*!
+  * \brief Sends a message to the destination based on the format parameter.
+  *
+

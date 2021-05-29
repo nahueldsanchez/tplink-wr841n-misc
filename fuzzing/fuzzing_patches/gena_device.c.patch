@@ -1,0 +1,15 @@
++++ tplink-wr841/gpl_code/TL-WR841NV14/apps/public/upnp_libs/src/gena_device.c
+@@ -221,8 +221,12 @@
+ 		return ret_code;
+ 	}
+ 	timeout = GENA_NOTIFICATION_ANSWERING_TIMEOUT;
++	#ifdef AFL_FUZZING
++	ret_code = 0;
++	#else
+ 	ret_code = http_RecvMessage(&info, response,
+ 		HTTPMETHOD_NOTIFY, &timeout, &err_code);
++	#endif
+ 	if (ret_code) {
+ 		membuffer_destroy(&start_msg);
+ 		sock_destroy(&info, SD_BOTH);
+

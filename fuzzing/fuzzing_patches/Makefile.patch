@@ -1,0 +1,41 @@
++++ tplink-wr841/gpl_code/TL-WR841NV14/apps/public/upnp_libs/Makefile
+@@ -3,6 +3,9 @@
+ #  Makefile Settings
+ #
+ ################################################################################
++
++#STRIP = strip
++#CC=<path_to_AFLplusplus/afl-clang-fast
+ 
+ UPNP_DEBUG ?= n
+ 
+@@ -16,6 +19,7 @@
+ 
+ LDFLAGS += -lpthread -lrt
+ CFLAGS += $(UPNP_INC) -Wall -fstrength-reduce -fomit-frame-pointer -pthread -D_GNU_SOURCE -fPIC #-D_XOPEN_SOURCE=500
++CFLAGS += -DAFL_FUZZING
+ 
+ ifeq ($(UPNP_DEBUG), y)
+ CFLAGS += -DDEBUG
+@@ -53,17 +57,17 @@
+ 	
+ $(LIBUPNP_FOBJ):$(LIBUPNP_OBJS)
+ 	$(CC) $(CFLAGS) -shared -fPIC $(LIBUPNP_OBJS) -o $@
+-	$(STRIP) $@ 
++#	$(STRIP) $@ 
+ 	@cp $@ $(UPNP_LIB)
+ 
+ $(LIBIXML_FOBJ):$(LIBIXML_OBJS)
+ 	$(CC) $(CFLAGS) -shared -fPIC $(LIBIXML_OBJS) -o $@
+-	$(STRIP) $@
++#	$(STRIP) $@
+ 	@cp $@ $(UPNP_LIB)
+ 
+ $(LIBTHREADUTIL_FOBJ):$(LIBTHREADUTIL_OBJS)
+ 	$(CC) $(CFLAGS) -shared -fPIC $(LIBTHREADUTIL_OBJS) -o $@
+-	$(STRIP) $@
++#	$(STRIP) $@
+ 	@cp $@ $(UPNP_LIB)
+ 
+ ifeq ($(FULL_COMPILE), y)
+
